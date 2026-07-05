@@ -240,6 +240,9 @@ function initThree() {
   renderLoop();
 }
 let rocketFlying = false;
+// motion state for dynamic, banking flight
+let rkPrevX = -6.4, rkPrevY = 0;   // last-frame position (to derive velocity)
+let rkBank = 0;                    // current nose lean, eased toward heading
 function renderLoop() {
   if (!hasWebGL) return;
   requestAnimationFrame(renderLoop);
@@ -247,24 +250,39 @@ function renderLoop() {
   // rocket: whole, continuous. Follows the cursor when the view is clear;
   // falls back to a gentle bob + slow crawl while an info window is open.
   if (rocketGroup && rocketFlying) {
-    // subtle nose wobble is always alive
-    rocketGroup.rotation.z = -Math.PI / 2 + Math.sin(now * 0.8) * 0.03;
-
     if (pointerActive && !windowOpen()) {
-      // steer toward where the cursor points, smoothly (lerp)
+      // steer toward where the cursor points, snappier so it feels alive
       const t = pointerWorldTarget();
-      // clamp into a comfortable on-screen box so the rocket never flies
-      // off-frame or behind UI; a little extra float added on top of target
       const tx = Math.max(-8, Math.min(8, t.x));
       const ty = Math.max(-4.2, Math.min(4.2, t.y));
-      rocketGroup.position.x += (tx - rocketGroup.position.x) * 0.055;
-      rocketGroup.position.y += (ty - rocketGroup.position.y) * 0.055 + Math.sin(now * 0.6) * 0.004;
+      // higher lerp = more responsive; a touch of idle float on top
+      rocketGroup.position.x += (tx - rocketGroup.position.x) * 0.09;
+      rocketGroup.position.y += (ty - rocketGroup.position.y) * 0.09 + Math.sin(now * 0.6) * 0.003;
     } else {
       // window open (or no pointer yet): original calm drift + bob
       rocketGroup.position.y += (Math.sin(now * 0.6) * 0.35 - rocketGroup.position.y) * 0.06;
       rocketGroup.position.x += DRIFT_SPEED;
       if (rocketGroup.position.x > -4.6) rocketGroup.position.x = -4.6;
     }
+
+    // --- dynamic nose: lean toward the vertical direction of travel ---
+    const vx = rocketGroup.position.x - rkPrevX;
+    const vy = rocketGroup.position.y - rkPrevY;
+    rkPrevX = rocketGroup.position.x; rkPrevY = rocketGroup.position.y;
+    const speed = Math.hypot(vx, vy);
+    const MAX_BANK = Math.PI / 3;   // 60 degrees, cap on the lean off horizontal
+    let targetBank;
+    if (speed > 0.0025) {
+      // heading vs. horizontal: pure sideways -> 0deg, pure up/down -> +-90deg
+      // (then clamped to +-60). Vertical motion drives the tilt.
+      const ang = Math.atan2(vy, Math.abs(vx));   // -PI/2..PI/2, sign = up/down
+      targetBank = Math.max(-MAX_BANK, Math.min(MAX_BANK, ang));
+    } else {
+      targetBank = Math.sin(now * 0.8) * 0.02;    // gentle idle wobble
+    }
+    // ease slowly so the nose glides between angles (no jitter)
+    rkBank += (targetBank - rkBank) * 0.06;
+    rocketGroup.rotation.z = -Math.PI / 2 + rkBank;
   }
   // flame flicker (engines always burning while flying)
   const f = 0.85 + Math.random() * 0.3;
@@ -700,6 +718,7 @@ function beginFlight() {
   if (rocketGroup) {
     rocketGroup.visible = true;
     rocketGroup.position.set(-6.4, 0, 0);
+    rkPrevX = -6.4; rkPrevY = 0; rkBank = 0;   // reset motion state
   }
   // rocket is ONE whole vehicle — all engines lit, sound continuous for the whole journey
   burnFlames(ALL_FLAMES);
@@ -783,18 +802,20 @@ async function connectPhase() {
   await wait(900);
   // reveal connect links below the message
   actionsEl.innerHTML =
-    `<div class="connect-list" style="min-width:min(420px,86vw)">
-       <a href="https://www.linkedin.com/in/rumen-vasilev-a79974264/" target="_blank" rel="noopener">
-         <span class="ci"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.47 4.47-2.47C21.4 7.73 24 10 24 14.6V24h-5v-8.3c0-2-.04-4.55-2.77-4.55-2.78 0-3.2 2.17-3.2 4.4V24h-5V8z"/></svg></span>
-         <span class="cv">Rumen Vasilev</span><span class="ck mono">LINKEDIN</span></a>
-       <a href="https://github.com/rumenvasil3v" target="_blank" rel="noopener">
-         <span class="ci"><svg viewBox="0 0 24 24"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.2 11.4.6.1.82-.26.82-.58v-2c-3.34.72-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.8 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.3.47-2.38 1.24-3.22-.13-.3-.54-1.52.1-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.3-1.23 3.3-1.23.63 1.65.23 2.87.1 3.17.77.84 1.24 1.92 1.24 3.22 0 4.6-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57C20.56 22.3 24 17.8 24 12.5 24 5.87 18.63.5 12 .5z"/></svg></span>
-         <span class="cv">rumenvasil3v</span><span class="ck mono">GITHUB</span></a>
-       <a href="mailto:rumenstvass@gmail.com">
-         <span class="ci"><svg viewBox="0 0 24 24"><path d="M2 4h20a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V6a2 2 0 012-2zm10 7L2.2 6h19.6L12 11zm0 2.2L2 7v11h20V7l-10 6.2z"/></svg></span>
-         <span class="cv">rumenstvass@gmail.com</span><span class="ck mono">EMAIL</span></a>
-     </div>
-     <button class="txt-btn accent" id="toEnd" style="margin-top:26px">Continue →</button>`;
+    `<div class="connect-wrap">
+       <div class="connect-list" style="min-width:min(420px,86vw)">
+         <a href="https://www.linkedin.com/in/rumen-vasilev-a79974264/" target="_blank" rel="noopener">
+           <span class="ci"><svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM0 8h5v16H0V8zm7.5 0H12v2.2h.07c.63-1.2 2.17-2.47 4.47-2.47C21.4 7.73 24 10 24 14.6V24h-5v-8.3c0-2-.04-4.55-2.77-4.55-2.78 0-3.2 2.17-3.2 4.4V24h-5V8z"/></svg></span>
+           <span class="cv">Rumen Vasilev</span><span class="ck mono">LINKEDIN</span></a>
+         <a href="https://github.com/rumenvasil3v" target="_blank" rel="noopener">
+           <span class="ci"><svg viewBox="0 0 24 24"><path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.2 11.4.6.1.82-.26.82-.58v-2c-3.34.72-4.04-1.6-4.04-1.6-.55-1.4-1.34-1.77-1.34-1.77-1.1-.75.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.8 1.3 3.5 1 .1-.78.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.3.47-2.38 1.24-3.22-.13-.3-.54-1.52.1-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 016 0c2.28-1.55 3.3-1.23 3.3-1.23.63 1.65.23 2.87.1 3.17.77.84 1.24 1.92 1.24 3.22 0 4.6-2.8 5.62-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.69.83.57C20.56 22.3 24 17.8 24 12.5 24 5.87 18.63.5 12 .5z"/></svg></span>
+           <span class="cv">rumenvasil3v</span><span class="ck mono">GITHUB</span></a>
+         <a href="mailto:rumenstvass@gmail.com">
+           <span class="ci"><svg viewBox="0 0 24 24"><path d="M2 4h20a2 2 0 012 2v12a2 2 0 01-2 2H2a2 2 0 01-2-2V6a2 2 0 012-2zm10 7L2.2 6h19.6L12 11zm0 2.2L2 7v11h20V7l-10 6.2z"/></svg></span>
+           <span class="cv">rumenstvass@gmail.com</span><span class="ck mono">EMAIL</span></a>
+       </div>
+       <button class="txt-btn accent" id="toEnd">Continue →</button>
+     </div>`;
   actionsEl.classList.add("show");
   document.getElementById("toEnd").onclick = () => { endingPhase(); };
 }
@@ -806,7 +827,7 @@ async function endingPhase() {
   seqToken++; const my = seqToken; clearActions(); paused = true;
   await typeIn("Thank you for being part of my journey", null, 44); if (my !== seqToken) return;
   await wait(1400); await fadeOut(); if (my !== seqToken) return; await wait(250);
-  await typeIn("Do you want to repeat my journey?", null, 44); if (my !== seqToken) return;
+  await typeIn("Do you want to play my journey again?", null, 44); if (my !== seqToken) return;
   await wait(300);
   actionsEl.innerHTML =
     `<button class="txt-btn accent" id="again">↻ Start again</button>
