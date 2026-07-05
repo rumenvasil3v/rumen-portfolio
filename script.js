@@ -1,4 +1,13 @@
 /* =========================================================
+   MOTION PREFERENCE
+   Visitors who ask their OS to minimise motion skip the animated
+   countdown/liftoff and drop straight into the flight. CSS handles
+   the decorative loops; this flag handles the scripted sequence.
+   ========================================================= */
+const REDUCED_MOTION = window.matchMedia
+  && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* =========================================================
    CONTENT
    ========================================================= */
 const STAGES=[
@@ -536,7 +545,7 @@ async function startMission(fromIntro){
   resetRocket();
   document.getElementById("hud").classList.remove("show");
 
-  if(fromIntro){
+  if(fromIntro && !REDUCED_MOTION){
     await typeIn("Welcome to my journey",null,56); if(my!==seqToken)return;
     await wait(1200); await typeOut(24); await wait(250);
     await typeIn("Get ready for lift-off",null,56); if(my!==seqToken)return;

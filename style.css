@@ -161,3 +161,61 @@ body{background:var(--bg);color:var(--ink);
 #resume{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:60;
   font-size:12px;letter-spacing:1.5px;color:var(--dim);opacity:0;transition:opacity .4s;pointer-events:none;}
 #resume.show{opacity:1;}
+
+/* ============================================================
+   MOBILE / SMALL SCREENS
+   The info window is offset to left:66% on desktop to leave room
+   for the star-to-window beam. On phones there's no room, so the
+   window centers, widens, and the beam is hidden.
+   ============================================================ */
+@media (max-width:720px){
+  #topbar{top:12px;left:14px;gap:12px;}
+  #topbar .brand{font-size:13px;letter-spacing:.5px;}
+  #social{gap:11px;}
+
+  #hud{top:12px;padding:2px 14px;font-size:11px;letter-spacing:.8px;}
+
+  /* center + widen the window; hide the connecting beam (no space) */
+  #win{left:50%;width:92vw;max-height:82vh;}
+  #starLine{display:none;}
+  .win-body{padding:22px 20px 26px;}
+  .win-head{padding:14px 18px;}
+  .win-hint{padding:8px 18px;font-size:10px;}
+
+  #skip{bottom:18px;right:16px;}
+  #resume{bottom:18px;font-size:11px;width:90vw;text-align:center;}
+
+  #introActions{gap:22px;margin-top:26px;}
+}
+
+/* very narrow phones */
+@media (max-width:420px){
+  #topbar .brand{font-size:12px;}
+  #win{width:94vw;max-height:84vh;}
+  .win-body .type-line{font-size:14px;}
+}
+
+/* short/landscape phones: keep the window scrollable, not clipped */
+@media (max-height:520px){
+  #win{max-height:90vh;top:50%;}
+  .win-body{padding-top:18px;padding-bottom:18px;}
+}
+
+/* ============================================================
+   REDUCED MOTION
+   Respect visitors who ask the OS to minimise animation.
+   JS also reads this (via matchMedia) to skip auto-flight and
+   drop the visitor straight onto the first waypoint.
+   ============================================================ */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  /* stop the looping decorative pulses/beams outright */
+  .win-hint .x,#starLineSeg,#introMsg.typing::after,.caret::after{animation:none !important;}
+  #starLineSeg{stroke-dasharray:none;}
+  .win-hint .x{opacity:1;}
+}
