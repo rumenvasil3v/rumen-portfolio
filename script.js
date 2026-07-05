@@ -804,9 +804,10 @@ async function connectPhase() {
    ========================================================= */
 async function endingPhase() {
   seqToken++; const my = seqToken; clearActions(); paused = true;
-  await typeIn("Thank you for being part of the journey", null, 44); if (my !== seqToken) return;
-  await wait(1400); await typeOut(20); await wait(300);
-  showMsg("Do you want to repeat the journey?");
+  await typeIn("Thank you for being part of my journey", null, 44); if (my !== seqToken) return;
+  await wait(1400); await fadeOut(); if (my !== seqToken) return; await wait(250);
+  await typeIn("Do you want to repeat my journey?", null, 44); if (my !== seqToken) return;
+  await wait(300);
   actionsEl.innerHTML =
     `<button class="txt-btn accent" id="again">↻ Start again</button>
      <button class="txt-btn" id="abort">✕ Abort</button>`;
@@ -817,7 +818,7 @@ async function endingPhase() {
 async function farewell() {
   seqToken++; const my = seqToken; clearActions(); stopEngineSound();
   await fadeOut();
-  await typeIn("Farewell, friend. Have a safe journey", null, 48); if (my !== seqToken) return;
+  await typeIn("Farewell, friend. Have a safe journey back home", null, 48); if (my !== seqToken) return;
   actionsEl.innerHTML = `<button class="txt-btn accent" id="againF">↻ Repeat the journey</button>`;
   actionsEl.classList.add("show");
   document.getElementById("againF").onclick = () => { startMission(true); };
