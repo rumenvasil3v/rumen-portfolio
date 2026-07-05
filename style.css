@@ -10,6 +10,27 @@ body{background:var(--bg);color:var(--ink);
   -webkit-font-smoothing:antialiased;}
 .mono{font-family:"SFMono-Regular",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;}
 
+/* ---------- custom cursor (themed: glowing bordered sphere + trailing core) ----------
+   Enabled by JS only on devices with a fine pointer. The body gets
+   .custom-cursor, which hides the native arrow across the whole page. */
+.custom-cursor,
+.custom-cursor *{cursor:none !important;}
+#cursorRing,#cursorDot{position:fixed;top:0;left:0;z-index:9999;pointer-events:none;
+  border-radius:50%;transform:translate(-50%,-50%);will-change:transform;}
+#cursorRing{width:30px;height:30px;
+  border:1.5px solid rgba(127,151,255,.85);
+  background:radial-gradient(circle,rgba(74,108,255,.20),rgba(74,108,255,.05) 60%,transparent 72%);
+  box-shadow:0 0 14px rgba(74,108,255,.45),inset 0 0 8px rgba(127,151,255,.35);
+  transition:width .18s ease,height .18s ease,border-color .18s ease,background .18s ease;}
+#cursorDot{width:5px;height:5px;background:#eef2ff;
+  box-shadow:0 0 8px rgba(174,192,255,.9);}
+/* grow + brighten over interactive elements */
+.custom-cursor.hot #cursorRing{width:46px;height:46px;border-color:rgba(174,192,255,1);
+  background:radial-gradient(circle,rgba(74,108,255,.30),rgba(74,108,255,.08) 60%,transparent 72%);
+  box-shadow:0 0 22px rgba(74,108,255,.6),inset 0 0 10px rgba(127,151,255,.5);}
+/* brief shrink on click */
+.custom-cursor.down #cursorRing{width:22px;height:22px;}
+
 #stars{position:fixed;inset:0;z-index:0;display:block;}
 #scene{position:fixed;inset:0;z-index:10;pointer-events:none;}
 

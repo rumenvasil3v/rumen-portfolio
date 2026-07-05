@@ -244,12 +244,27 @@ function renderLoop() {
   if (!hasWebGL) return;
   requestAnimationFrame(renderLoop);
   const now = performance.now() * 0.001;
-  // rocket: whole, continuous. Gentle vertical bob + subtle sway; slow forward crawl always on
+  // rocket: whole, continuous. Follows the cursor when the view is clear;
+  // falls back to a gentle bob + slow crawl while an info window is open.
   if (rocketGroup && rocketFlying) {
-    rocketGroup.position.y = Math.sin(now * 0.6) * 0.35;
-    rocketGroup.rotation.z = -Math.PI / 2 + Math.sin(now * 0.8) * 0.03;  // slight nose wobble
-    rocketGroup.position.x += DRIFT_SPEED;                          // slow crawl to the right
-    if (rocketGroup.position.x > -4.6) rocketGroup.position.x = -4.6; // don't crawl past mid-left
+    // subtle nose wobble is always alive
+    rocketGroup.rotation.z = -Math.PI / 2 + Math.sin(now * 0.8) * 0.03;
+
+    if (pointerActive && !windowOpen()) {
+      // steer toward where the cursor points, smoothly (lerp)
+      const t = pointerWorldTarget();
+      // clamp into a comfortable on-screen box so the rocket never flies
+      // off-frame or behind UI; a little extra float added on top of target
+      const tx = Math.max(-8, Math.min(8, t.x));
+      const ty = Math.max(-4.2, Math.min(4.2, t.y));
+      rocketGroup.position.x += (tx - rocketGroup.position.x) * 0.055;
+      rocketGroup.position.y += (ty - rocketGroup.position.y) * 0.055 + Math.sin(now * 0.6) * 0.004;
+    } else {
+      // window open (or no pointer yet): original calm drift + bob
+      rocketGroup.position.y += (Math.sin(now * 0.6) * 0.35 - rocketGroup.position.y) * 0.06;
+      rocketGroup.position.x += DRIFT_SPEED;
+      if (rocketGroup.position.x > -4.6) rocketGroup.position.x = -4.6;
+    }
   }
   // flame flicker (engines always burning while flying)
   const f = 0.85 + Math.random() * 0.3;
@@ -263,6 +278,72 @@ addEventListener("resize", () => {
   applyResponsiveCamera();
   renderer.setSize(innerWidth, innerHeight);
 });
+
+/* ---- cursor tracking: the rocket follows the pointer when no window is open ---- */
+let pointerNDC = { x: 0, y: 0 };     // normalised device coords, -1..1
+let pointerActive = false;           // becomes true after first real move
+function updatePointerNDC(clientX, clientY) {
+  pointerNDC.x = (clientX / innerWidth) * 2 - 1;
+  pointerNDC.y = -(clientY / innerHeight) * 2 + 1;
+  pointerActive = true;
+}
+addEventListener("pointermove", e => updatePointerNDC(e.clientX, e.clientY), { passive: true });
+// touch: let a drag steer the rocket too
+addEventListener("touchmove", e => {
+  if (e.touches && e.touches[0]) updatePointerNDC(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: true });
+
+// true while an info window (or its scrim) is on screen
+function windowOpen() {
+  return win.classList.contains("open") || winScrim.classList.contains("open");
+}
+
+// project the pointer onto the rocket's z=0 world plane, so we know where
+// in 3D space the cursor is pointing. Reused each frame.
+const _ptV = new THREE.Vector3();
+function pointerWorldTarget() {
+  _ptV.set(pointerNDC.x, pointerNDC.y, 0.5).unproject(camera);
+  const dir = _ptV.sub(camera.position).normalize();
+  const dist = -camera.position.z / dir.z;      // travel to z=0 plane
+  return camera.position.clone().add(dir.multiplyScalar(dist));
+}
+
+/* ---- themed custom cursor: glowing bordered sphere + trailing core ---- */
+(function customCursor() {
+  const fine = window.matchMedia && window.matchMedia("(pointer:fine)").matches;
+  const ring = document.getElementById("cursorRing");
+  const dot = document.getElementById("cursorDot");
+  if (!fine || !ring || !dot) return;             // skip on touch / coarse pointers
+
+  document.body.classList.add("custom-cursor");
+  let mx = innerWidth / 2, my = innerHeight / 2;   // live pointer
+  let rx = mx, ry = my;                             // ring position (lags slightly)
+  let seen = false;
+
+  addEventListener("pointermove", e => {
+    mx = e.clientX; my = e.clientY;
+    if (!seen) { rx = mx; ry = my; seen = true; ring.style.opacity = dot.style.opacity = "1"; }
+    dot.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+    // ring over an interactive element? -> "hot" state
+    const el = e.target;
+    const hot = el && (el.closest && el.closest('a,button,[role="button"],.txt-btn,.win-close,.connect-list a,.proj-nav button'));
+    document.body.classList.toggle("hot", !!hot);
+  }, { passive: true });
+
+  addEventListener("pointerdown", () => document.body.classList.add("down"), { passive: true });
+  addEventListener("pointerup", () => document.body.classList.remove("down"), { passive: true });
+  // hide when the pointer leaves the window
+  addEventListener("pointerleave", () => { ring.style.opacity = dot.style.opacity = "0"; });
+  addEventListener("pointerenter", () => { if (seen) ring.style.opacity = dot.style.opacity = "1"; });
+
+  ring.style.opacity = dot.style.opacity = "0";
+  (function follow() {
+    rx += (mx - rx) * 0.22; ry += (my - ry) * 0.22;   // smooth trailing ring
+    ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+    requestAnimationFrame(follow);
+  })();
+})();
+
 initThree();
 
 /* =========================================================
