@@ -191,6 +191,25 @@ function buildRocket(){
   scene.add(rocketGroup);
 }
 
+/* Responsive camera: on narrow / portrait screens the horizontal field
+   of view is much tighter, which crops the rocket (held far left) and
+   the incoming stars (right) off the edges and makes them look tiny.
+   Pull the camera back as the screen narrows so the whole scene fits,
+   giving the rocket and stars room and separation on phones. */
+function applyResponsiveCamera(){
+  if(!camera) return;
+  const aspect = innerWidth/innerHeight;
+  let z;
+  if(aspect >= 1.6)      z = 15;   // wide desktop — original framing
+  else if(aspect >= 1.2) z = 17;   // small laptop / landscape tablet
+  else if(aspect >= 0.9) z = 20;   // square-ish / portrait tablet
+  else if(aspect >= 0.65)z = 25;   // large phone portrait
+  else                   z = 30;   // narrow phone portrait — pull well back
+  camera.position.z = z;
+  camera.aspect = aspect;
+  camera.updateProjectionMatrix();
+}
+
 function initThree(){
   if(!hasWebGL) return;
   renderer=new THREE.WebGLRenderer({alpha:true,antialias:true});
@@ -201,6 +220,7 @@ function initThree(){
   camera=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.1,100);
   camera.position.set(0,0,15);
   camera.lookAt(0,0,0);
+  applyResponsiveCamera();
 
   scene.add(new THREE.AmbientLight(0x556080,0.75));
   const key=new THREE.DirectionalLight(0xffffff,1.15); key.position.set(4,6,6); scene.add(key);
@@ -230,7 +250,7 @@ function renderLoop(){
 }
 addEventListener("resize",()=>{
   if(!hasWebGL) return;
-  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  applyResponsiveCamera();
   renderer.setSize(innerWidth,innerHeight);
 });
 initThree();
