@@ -59,7 +59,10 @@ body{background:var(--bg);color:var(--ink);
   color:var(--accent-soft);text-shadow:0 0 60px rgba(74,108,255,.4);}
 #introMsg.liftoff{color:#fff;text-shadow:0 0 80px rgba(74,108,255,.7);letter-spacing:2px;}
 #introMsg.fade-out{opacity:0;}
-#introMsg.typing::after{content:"▌";color:var(--accent-soft);margin-left:2px;animation:blink 1s steps(1) infinite;}
+#introMsg.typing::after{content:"";display:inline-block;width:2px;height:1em;
+  margin-left:4px;vertical-align:-0.12em;border-radius:1px;
+  background:var(--accent-soft);box-shadow:0 0 6px rgba(127,151,255,.7);
+  animation:caretPulse 1.05s ease-in-out infinite;}
 
 /* intro sub-actions (repeat/abort buttons + connect links shown over starfield) */
 #introActions{margin-top:34px;display:flex;gap:32px;justify-content:center;flex-wrap:wrap;align-items:center;
@@ -78,6 +81,7 @@ body{background:var(--bg);color:var(--ink);
   color:var(--dim);background:none;border:none;cursor:pointer;transition:color .18s,text-shadow .18s;font-family:inherit;}
 #skip:hover{color:#fff;text-shadow:0 0 12px rgba(127,139,255,.8);}
 @keyframes blink{50%{opacity:0;}}
+@keyframes caretPulse{0%,100%{opacity:1;}50%{opacity:.15;}}
 
 /* ---------- flight HUD ---------- */
 #hud{position:fixed;top:16px;right:0;z-index:20;display:flex;justify-content:flex-end;
@@ -129,7 +133,10 @@ body{background:var(--bg);color:var(--ink);
 .win-body{padding:26px 28px 30px;overflow-y:auto;flex:1;}
 .win-body h2{font-size:clamp(22px,4vw,30px);font-weight:600;letter-spacing:-.5px;margin-bottom:16px;min-height:34px;}
 .win-body .type-line{font-size:15px;color:var(--muted);line-height:1.75;white-space:pre-wrap;}
-.caret::after{content:"▌";color:var(--accent-soft);animation:blink 1s steps(1) infinite;}
+.caret::after{content:"";display:inline-block;width:2px;height:1em;
+  margin-left:3px;vertical-align:-0.12em;border-radius:1px;
+  background:var(--accent-soft);box-shadow:0 0 6px rgba(127,151,255,.7);
+  animation:caretPulse 1.05s ease-in-out infinite;}
 .reveal{opacity:0;transform:translateY(8px);transition:opacity .5s,transform .5s;}
 .reveal.in{opacity:1;transform:none;}
 
