@@ -12,38 +12,38 @@ const REDUCED_MOTION = window.matchMedia
    ========================================================= */
 const STAGES = [
   {
-    part: "rBooster", tag: "SRB SEP · RIGHT BOOSTER", sep: "T+02:12 · STAGE 01",
+    sep: "T+02:12 · STAR 01",
     title: "About Me",
-    type: "Hey! My name is Rumen and I am glad to guide you through my journey! Currently, I am studying Computer Science at the University of Surrey and I am headed towards my second-year. I love science, maths, physics, electronics and bunch of other stuff (non-tech related as well). I am excited about AI, robotics and cybersecurity and more specifically the security implications of AI. Along with that, I am intersted in the space industry and I want to specizize there, protecting space assets and automating stuff with AI and robotics. In my free time and hobby time I am learning Arduino and electronics realising my robotics journey and when I need to clear my mind a bit from all the tech I love to go out and skateboard, watch a movie, or hiking. Moreover, reading interesting stuff and travelling to interesting places. I would love to connect, at the end of the journey you'll find contact details. Now, have fun :).",
+    type: "Hey! My name is Rumen and I will guide you through my journey! Currently, I am studying Computer Science at the University of Surrey and I am headed towards my second-year. I love science, maths, physics, electronics and bunch of other stuff (non-tech related as well). I am excited about AI, robotics and cybersecurity and more specifically the security implications of AI. Along with that, I am intersted in the space industry and I want to specialize there, protecting space assets and automating stuff with AI and robotics. In my free time and hobby time I am learning Arduino and electronics realising my robotics journey and when I need to clear my mind a bit from all the tech I love to go out and skateboard, watch a movie, or hiking. Moreover, reading interesting stuff and travelling to interesting places. I would love to connect, at the end of the journey you'll find contact details. Now, have fun :).",
     extra: `<div class="tags"><span class="tag2">Computer Science</span><span class="tag2">Cybersecurity</span><span class="tag2">AI &amp; Robotics</span><span class="tag2">Space</span><span class="tag2">Problem-solving</span></div>`
   },
 
   {
-    part: "lBooster", tag: "SRB SEP · LEFT BOOSTER", sep: "T+02:14 · STAGE 02",
+    sep: "T+02:14 · STAR 02",
     title: "Education",
-    type: "BSc (Hons) Computer Science — University of Surrey.\n\nAlongside the degree I'm training as a Junior Cybersecurity Analyst through Hack The Box: networking, Linux, footprinting, traffic analysis, SIEM and threat hunting.",
-    extra: `<div class="row"><div class="role">BSc (Hons) Computer Science</div><div class="meta">University of Surrey</div><div class="d">Core CS, systems, algorithms and software engineering.</div></div>
-      <div class="row"><div class="role">Junior Cybersecurity Analyst (in progress)</div><div class="meta">Hack The Box Academy</div><div class="d">Networking, Linux, footprinting, traffic analysis, SIEM, threat hunting.</div></div>` },
+    type: "Alongside the degree I'm training as a Junior Cybersecurity Analyst through Hack The Box and gaining expertise into the cybersecurity field through hands-on practice and labs. During first-year I participated into wide range of competitions and focused on fundamentals.",
+    extra: `<div class="row"><div class="role">BSc (Hons) Computer Science | Sep 2025 - Present</div><div class="meta">University of Surrey</div><div class="d">Core CS, SWE, DSA, Operating systems and Maths.</div></div>
+      <div class="row"><div class="role">Junior Cybersecurity Analyst | Oct 2025 - Present</div><div class="meta">Hack The Box Academy</div><div class="d">Networking, Linux, footprinting, traffic analysis, SIEM, threat hunting.</div></div>` },
 
   {
-    part: "core", tag: "CORE STAGE SEP", sep: "T+08:03 · STAGE 03",
+    sep: "T+08:03 · STAR 03",
     title: "Professional Experience",
-    type: "Roles across teaching, data and technical support — most recent first.",
+    type: "Currently, I am Computer Science tutor preparing pupils from all age groups to successfully pass their GCSEs and A-Levels. Moreover, I had the privilege to be intern twice in Portugal as part of the Erasmus+ Programme while I was in high school. During the first internship I was responsible for system administration and IT support, while the second one was oriented towards Data Science.",
     extra: `<div class="row"><div class="role">Computer Science Tutor</div><div class="meta">MyTutor · Mar 2026 – Present</div><div class="d">Teaching Computer Science across all age groups, preparing pupils for GCSE and A-Level.</div></div>
       <div class="row"><div class="role">Data Analyst Intern</div><div class="meta">Gabimendes · Jun 2024 – Jul 2024</div><div class="d">Processed and validated financial data from Portuguese invoicing systems; automated invoice handling with Python and SQL.</div></div>
       <div class="row"><div class="role">Technical Support Intern</div><div class="meta">AE Mosteiro e Cávado · Mar 2023 – Apr 2023</div><div class="d">Maintained and repaired hardware; monitored LAN connectivity and configured network devices.</div></div>` },
 
   {
-    part: "upper", tag: "UPPER STAGE SEP", sep: "T+12:41 · STAGE 04",
+    sep: "T+12:41 · STAR 04",
     title: "Projects",
-    type: "A payload of builds spanning security tooling and systems engineering.",
+    type: "On this window you can find a couple of projects I have done spanning from enumerating hosts on infrastructure level to a database index engine. This is just a short list of projects I have worked on. If you want to find more I encourage you to have a look of my github profile. You can find link on the upper-left corner where the github icon is and click on it or at the end of the journey you will find contact details. Both methods work.",
     projects: true
   },
 
   {
-    part: "fairing", tag: "FAIRING JETTISON", sep: "T+13:20 · STAGE 05",
+    sep: "T+13:20 · STAR 05",
     title: "Skills",
-    type: "The instruments this engineer runs on.",
+    type: "List of my expertise and areas",
     extra: `<div class="sh mono">LANGUAGES</div>
       <div class="chips"><span class="chip">Python</span><span class="chip">Java</span><span class="chip">C#</span><span class="chip">C / C++</span><span class="chip">JavaScript</span><span class="chip">HTML5 · CSS3</span></div>
       <div class="sh mono">NETWORKING &amp; SECURITY</div>
@@ -52,7 +52,7 @@ const STAGES = [
       <div class="chips"><span class="chip">Spring</span><span class="chip">Docker</span><span class="chip">Linux</span><span class="chip">Git</span><span class="chip">MySQL</span><span class="chip">MongoDB</span></div>` },
 
   {
-    part: "capsule", tag: "PAYLOAD DEPLOY · CAPSULE", sep: "T+18:00 · ORBIT",
+    sep: "T+18:00 · STAR 06",
     title: "Awards & Certifications",
     type: "Recognitions and credentials earned along the way.",
     extra: `<ul class="certs">
