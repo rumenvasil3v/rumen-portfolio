@@ -99,9 +99,7 @@ function starLoop(t) {
 addEventListener("resize", () => { DPR = Math.min(devicePixelRatio || 1, 2); sizeStars(); });
 sizeStars(); requestAnimationFrame(starLoop);
 
-/* =========================================================
-   THREE.JS SCENE — rocket + debris
-   ========================================================= */
+// Three.js rocket
 let renderer, scene, camera, rocketGroup, parts = {}, flames = {}, hasWebGL = !!window.THREE;
 const sceneEl = document.getElementById("scene");
 // star state declared up-front: the render loop (started inside initThree, below)
